@@ -1,0 +1,42 @@
+# ─── SECRETS ──────────────────────────────────────────────────────────────────
+.env
+*.pem
+*.key
+*.crt
+nginx/certs/
+
+# ─── BACKEND ──────────────────────────────────────────────────────────────────
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/coverage/
+
+# ─── FRONTEND (Flutter) ───────────────────────────────────────────────────────
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.pub-cache/
+frontend/.pub/
+frontend/build/
+frontend/.idea/
+frontend/*.iml
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/key.properties
+frontend/android/app/google-services.json
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/flutter_export_environment.sh
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Runner/GeneratedPluginRegistrant.*
+frontend/ios/firebase_app_id_file.json
+
+# ─── DOCKER ───────────────────────────────────────────────────────────────────
+# keep docker-compose.yml, ignore override files
+docker-compose.override.yml
+
+# ─── MISC ─────────────────────────────────────────────────────────────────────
+generate_report.py
+*.log
+.DS_Store
+.vscode/
