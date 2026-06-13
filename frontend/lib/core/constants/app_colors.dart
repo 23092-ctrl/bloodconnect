@@ -1,23 +1,41 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primary = Color(0xFFD32F2F);
-  static const primaryDark = Color(0xFF9A0007);
-  static const primaryLight = Color(0xFFFF6659);
-  static const secondary = Color(0xFF1565C0);
-  static const background = Color(0xFFF5F5F5);
+  // ── Brand rouge sang — utilisé UNIQUEMENT pour les éléments liés au sang ──
+  static const primary = Color(0xFFC62828);       // Rouge sang (bouton Donate, badges)
+  static const primaryDark = Color(0xFF8E0000);
+  static const primaryLight = Color(0xFFFF5F52);
+
+  // ── Couleur secondaire (actions positives, confirm) ──────────────────────
+  static const secondary = Color(0xFF1565C0);      // Bleu
+  static const secondaryLight = Color(0xFF5E92F3);
+
+  // ── Statuts inventaire ───────────────────────────────────────────────────
+  static const criticalRed = Color(0xFFC62828);
+  static const lowOrange = Color(0xFFE65100);
+  static const normalGreen = Color(0xFF2E7D32);
+
+  // ── Surfaces light ───────────────────────────────────────────────────────
+  static const background = Color(0xFFF5F7FA);
   static const surface = Color(0xFFFFFFFF);
-  static const error = Color(0xFFB00020);
+  static const cardLight = Color(0xFFFFFFFF);
+
+  // ── Surfaces dark ────────────────────────────────────────────────────────
+  static const backgroundDark = Color(0xFF121212);
+  static const surfaceDark = Color(0xFF1E1E1E);
+  static const cardDark = Color(0xFF2A2A2A);
+
+  // ── Texte ────────────────────────────────────────────────────────────────
   static const onPrimary = Color(0xFFFFFFFF);
-  static const onBackground = Color(0xFF212121);
-  static const onSurface = Color(0xFF212121);
-  static const textSecondary = Color(0xFF757575);
-  static const divider = Color(0xFFBDBDBD);
+  static const onBackground = Color(0xFF1A1A1A);
+  static const onSurface = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF6B7280);
+  static const divider = Color(0xFFE5E7EB);
 
-  static const criticalRed = Color(0xFFD32F2F);
-  static const lowOrange = Color(0xFFF57C00);
-  static const normalGreen = Color(0xFF388E3C);
+  // ── Divers ───────────────────────────────────────────────────────────────
+  static const error = Color(0xFFB00020);
 
+  // ── Couleurs par groupe sanguin ──────────────────────────────────────────
   static const bloodTypes = {
     'A+': Color(0xFFE53935),
     'A-': Color(0xFFEF9A9A),

@@ -1,19 +1,39 @@
-import '../../domain/entities/user_entity.dart';
+class UserModel {
+  final String id;
+  final String fullName;
+  final String email;
+  final String? bloodType;
+  final String? gender;
+  final String? phone;
+  final String? profilePicture;
+  final bool notificationsEnabled;
+  final bool medicallyEligible;
+  final DateTime? lastDonationDate;
+  final String role;
 
-class UserModel extends UserEntity {
   const UserModel({
-    required super.id,
-    required super.fullName,
-    required super.email,
-    super.bloodType,
-    super.gender,
-    super.phone,
-    super.profilePicture,
-    required super.notificationsEnabled,
-    required super.medicallyEligible,
-    super.lastDonationDate,
-    required super.role,
+    required this.id,
+    required this.fullName,
+    required this.email,
+    this.bloodType,
+    this.gender,
+    this.phone,
+    this.profilePicture,
+    required this.notificationsEnabled,
+    required this.medicallyEligible,
+    this.lastDonationDate,
+    required this.role,
   });
+
+  bool get canDonate {
+    if (!medicallyEligible) return false;
+    if (lastDonationDate == null) return true;
+    return DateTime.now().difference(lastDonationDate!).inDays >= 56;
+  }
+
+  int? get daysSinceLastDonation => lastDonationDate != null
+      ? DateTime.now().difference(lastDonationDate!).inDays
+      : null;
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         id: json['_id'] ?? json['id'],

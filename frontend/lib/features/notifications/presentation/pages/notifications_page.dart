@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../services/cache_service.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -19,6 +20,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
+    // Affiche le cache immédiatement
+    final cached = CacheService.notifications;
+    if (cached != null) {
+      _notifications = cached;
+      _loading = false;
+    }
     _load();
   }
 
@@ -26,13 +33,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     try {
       final response = await ApiClient.instance.get(ApiEndpoints.notifications);
       final data = response.data['data'];
-      setState(() {
-        _notifications = data['notifications'] as List;
-        _unread = data['unread'] as int;
-        _loading = false;
-      });
+      final notifs = data['notifications'] as List;
+      await CacheService.saveNotifications(notifs);
+      if (mounted) {
+        setState(() {
+          _notifications = notifs;
+          _unread = data['unread'] as int;
+          _loading = false;
+        });
+      }
     } catch (_) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 

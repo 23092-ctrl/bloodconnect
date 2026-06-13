@@ -187,7 +187,7 @@ GET    /api/donations/my/stats
 
 - Authentification JWT avec refresh token automatique
 - Carte des centres de transfusion avec stocks en temps réel
-- Alertes push de pénurie sanguine (Firebase FCM)
+- Alertes in-app de pénurie sanguine (notifications stockées en base)
 - Moteur de détection automatique des pénuries (cron toutes les 30 min)
 - Confirmation automatique des demandes lors d'une pénurie critique
 - Règle d'éligibilité médicale et délai de 56 jours entre dons

@@ -67,10 +67,29 @@ class _MapsPageState extends State<MapsPage> {
   Future<void> _navigateTo(dynamic center) async {
     final coords = center['location']?['coordinates'];
     if (coords == null) return;
-    final lat = coords[1];
-    final lng = coords[0];
-    final uri = Uri.parse('geo:$lat,$lng?q=$lat,$lng(${center['name']})');
-    if (await canLaunchUrl(uri)) launchUrl(uri);
+    final destLat = coords[1];
+    final destLng = coords[0];
+    final name = Uri.encodeComponent(center['name'] as String? ?? 'Blood Center');
+
+    Uri uri;
+    if (_userLat != null && _userLng != null) {
+      // Ouvre Google Maps avec l'itinéraire depuis la position de l'utilisateur
+      uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1'
+        '&origin=$_userLat,$_userLng'
+        '&destination=$destLat,$destLng'
+        '&travelmode=driving',
+      );
+    } else {
+      // Pas de position connue : ouvre juste la localisation du centre
+      uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$destLat,$destLng($name)',
+      );
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
@@ -184,13 +203,21 @@ class _CentersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
       itemCount: centers.length,
       itemBuilder: (_, i) {
         final c = centers[i];
         final isSelected = selectedCenter?['_id'] == c['_id'];
+        final address = c['address'] is String
+            ? c['address'] as String
+            : c['address'] is Map
+                ? (c['address']['street'] ?? c['address']['city'] ?? '') as String
+                : '';
+        final coords = c['location']?['coordinates'];
+        final hasCoords = coords != null;
+
         return Card(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: const EdgeInsets.only(bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
@@ -198,22 +225,89 @@ class _CentersList extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFFFFEBEE),
-              child: Icon(Icons.local_hospital, color: AppColors.primary),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              onCenterTap(c);
+              onNavigate(c); // clic sur la carte = ouvrir Google Maps
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Color(0xFFFFEBEE),
+                    child: Icon(Icons.local_hospital, color: AppColors.primary, size: 26),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          c['name'] as String? ?? 'Blood Center',
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        ),
+                        if (address.isNotEmpty) ...[
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined,
+                                  size: 13, color: AppColors.textSecondary),
+                              const SizedBox(width: 3),
+                              Expanded(
+                                child: Text(
+                                  address,
+                                  style: const TextStyle(
+                                      fontSize: 12, color: AppColors.textSecondary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (c['phone'] != null) ...[
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              const Icon(Icons.phone_outlined,
+                                  size: 13, color: AppColors.textSecondary),
+                              const SizedBox(width: 3),
+                              Text(
+                                c['phone'] as String,
+                                style: const TextStyle(
+                                    fontSize: 12, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (hasCoords)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.directions, color: AppColors.primary, size: 22),
+                          SizedBox(height: 2),
+                          Text('Go',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
-            title: Text(c['name'] ?? 'Blood Center',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: c['address'] != null
-                ? Text(c['address'],
-                    maxLines: 1, overflow: TextOverflow.ellipsis)
-                : null,
-            trailing: IconButton(
-              icon: const Icon(Icons.navigation, color: AppColors.primary),
-              onPressed: () => onNavigate(c),
-            ),
-            onTap: () => onCenterTap(c),
           ),
         );
       },

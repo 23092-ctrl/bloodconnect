@@ -1,0 +1,68 @@
+{
+  "@@locale": "fr",
+  "appTitle": "BloodConnect",
+  "tagline": "Sauver des vies, ensemble",
+  "welcomeBack": "Bon retour",
+  "signInSubtitle": "Connectez-vous pour continuer à sauver des vies",
+  "signIn": "Se connecter",
+  "signOut": "Se déconnecter",
+  "createAccount": "Créer un compte",
+  "email": "Email",
+  "password": "Mot de passe",
+  "fullName": "Nom complet",
+  "phone": "Téléphone",
+  "bloodType": "Groupe sanguin",
+  "gender": "Sexe",
+  "male": "Homme",
+  "female": "Femme",
+  "noAccount": "Pas de compte ? S'inscrire",
+  "home": "Accueil",
+  "donations": "Dons",
+  "map": "Carte",
+  "alerts": "Alertes",
+  "profile": "Profil",
+  "admin": "Admin",
+  "notifications": "Notifications",
+  "donate": "Donner",
+  "cancel": "Annuler",
+  "saveChanges": "Sauvegarder",
+  "editProfile": "Modifier le profil",
+  "settings": "Paramètres",
+  "account": "Compte",
+  "signOutConfirmTitle": "Déconnexion",
+  "signOutConfirmBody": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "eligibleToDonate": "Éligible au don",
+  "notYetEligible": "Pas encore éligible",
+  "noDonationHistory": "Aucun historique de don",
+  "nationalBloodStock": "Stock national de sang",
+  "realTimeInventory": "Inventaire en temps réel dans toutes les banques de sang",
+  "nearbyBloodCenters": "Centres de sang à proximité",
+  "shortageAlerts": "Alertes de pénurie",
+  "shortageAlertsSubtitle": "Recevoir des notifications en cas de pénurie critique",
+  "medicalStatus": "Statut médical",
+  "myRequests": "Mes demandes",
+  "newRequest": "Nouvelle demande",
+  "markAllRead": "Tout marquer comme lu",
+  "noNotificationsYet": "Aucune notification",
+  "youCanDonateToday": "Vous pouvez donner aujourd'hui !",
+  "findNearestBloodBank": "Trouvez votre banque de sang la plus proche",
+  "donatedRecently": "Vous avez donné récemment. Merci !",
+  "hello": "Bonjour, {name} !",
+  "@hello": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "daysUntilNextDonation": "{days} jours avant le prochain don",
+  "@daysUntilNextDonation": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "lastDonationDaysAgo": "Dernier don : il y a {days} jours",
+  "@lastDonationDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  }
+}

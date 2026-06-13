@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
+import 'package:provider/provider.dart';
+import '../../../../controllers/auth_controller.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
@@ -15,18 +14,15 @@ class DonationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        if (state is! AuthAuthenticated) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-        final role = state.user.role;
-        if (role == 'center_admin' || role == 'admin') {
-          return const _CenterRequestsPage();
-        }
-        return const _DonorRequestsPage();
-      },
-    );
+    final auth = context.watch<AuthController>();
+    if (!auth.isAuthenticated) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final role = auth.user!.role;
+    if (role == 'center_admin' || role == 'admin') {
+      return const _CenterRequestsPage();
+    }
+    return const _DonorRequestsPage();
   }
 }
 
@@ -114,9 +110,9 @@ class _DonorRequestsPageState extends State<_DonorRequestsPage> {
   }
 
   void _openNewRequestForm() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is! AuthAuthenticated) return;
-    final user = authState.user;
+    final auth = context.read<AuthController>();
+    if (!auth.isAuthenticated) return;
+    final user = auth.user!;
 
     if (!user.medicallyEligible) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,0 +1,68 @@
+{
+  "@@locale": "en",
+  "appTitle": "BloodConnect",
+  "tagline": "Saving lives, together",
+  "welcomeBack": "Welcome back",
+  "signInSubtitle": "Sign in to continue saving lives",
+  "signIn": "Sign In",
+  "signOut": "Sign Out",
+  "createAccount": "Create Account",
+  "email": "Email",
+  "password": "Password",
+  "fullName": "Full Name",
+  "phone": "Phone",
+  "bloodType": "Blood Type",
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+  "noAccount": "Don't have an account? Register",
+  "home": "Home",
+  "donations": "Donations",
+  "map": "Map",
+  "alerts": "Alerts",
+  "profile": "Profile",
+  "admin": "Admin",
+  "notifications": "Notifications",
+  "donate": "Donate",
+  "cancel": "Cancel",
+  "saveChanges": "Save Changes",
+  "editProfile": "Edit Profile",
+  "settings": "Settings",
+  "account": "Account",
+  "signOutConfirmTitle": "Sign Out",
+  "signOutConfirmBody": "Are you sure you want to sign out?",
+  "eligibleToDonate": "Eligible to donate",
+  "notYetEligible": "Not yet eligible",
+  "noDonationHistory": "No donation history",
+  "nationalBloodStock": "National Blood Stock",
+  "realTimeInventory": "Real-time inventory across all blood banks",
+  "nearbyBloodCenters": "Nearby Blood Centers",
+  "shortageAlerts": "Shortage Alerts",
+  "shortageAlertsSubtitle": "Receive notifications when blood is critically low",
+  "medicalStatus": "Medical Status",
+  "myRequests": "My Requests",
+  "newRequest": "New Request",
+  "markAllRead": "Mark all read",
+  "noNotificationsYet": "No notifications yet",
+  "youCanDonateToday": "You can donate today!",
+  "findNearestBloodBank": "Find your nearest blood bank",
+  "donatedRecently": "You donated recently. Thank you!",
+  "hello": "Hello, {name}!",
+  "@hello": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "daysUntilNextDonation": "{days} days until next donation",
+  "@daysUntilNextDonation": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "lastDonationDaysAgo": "Last donation: {days} days ago",
+  "@lastDonationDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  }
+}

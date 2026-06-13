@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
-import '../../../../core/constants/api_endpoints.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../core/storage/local_storage.dart';
+import '../core/constants/api_endpoints.dart';
+import '../core/network/api_client.dart';
 import '../models/user_model.dart';
 
-class AuthRemoteDataSource {
+class AuthService {
   final Dio _dio = ApiClient.instance;
 
   Future<({UserModel user, String accessToken, String refreshToken})> login({

@@ -1,42 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/local_storage.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/bloc/auth_state.dart';
+import 'controllers/auth_controller.dart';
+import 'controllers/settings_controller.dart';
+import 'l10n/app_localizations.dart';
+import 'services/cache_service.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalStorage.init();
+  await CacheService.init();
+  await SettingsController.init();
+  await NotificationService.init();
   await di.initDependencies();
   runApp(const BloodConnectApp());
 }
 
-class BloodConnectApp extends StatelessWidget {
+class BloodConnectApp extends StatefulWidget {
   const BloodConnectApp({super.key});
 
   @override
+  State<BloodConnectApp> createState() => _BloodConnectAppState();
+}
+
+class _BloodConnectAppState extends State<BloodConnectApp> {
+  late final AuthController _auth;
+  late final SettingsController _settings;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _auth = sl<AuthController>();
+    _settings = sl<SettingsController>();
+    _router = AppRouter.createRouter(_auth);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
+        ChangeNotifierProvider.value(value: _auth),
+        ChangeNotifierProvider.value(value: _settings),
       ],
-      child: BlocListener<AuthBloc, AuthState>(
-        listenWhen: (_, curr) => curr is AuthUnauthenticated,
-        listener: (_, __) {
-          // Delay navigation until after any ongoing dialog/route animation finishes
-          Future.delayed(const Duration(milliseconds: 300), () {
-            AppRouter.router.go('/login');
-          });
-        },
-        child: MaterialApp.router(
+      child: Consumer<SettingsController>(
+        builder: (context, settings, _) => MaterialApp.router(
           title: 'BloodConnect',
           theme: AppTheme.light,
-          routerConfig: AppRouter.router,
+          darkTheme: AppTheme.dark,
+          themeMode: settings.themeMode,
+          routerConfig: _router,
           debugShowCheckedModeBanner: false,
+          locale: settings.locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
         ),
       ),
     );

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dio/dio.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+import '../../../../controllers/auth_controller.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../services/cache_service.dart';
 import '../../../../shared/widgets/blood_type_badge.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,18 +24,28 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Affiche le cache immédiatement, rafraîchit en arrière-plan
+    final cached = CacheService.bloodSummary;
+    if (cached != null) {
+      _summary = cached;
+      _loading = false;
+    }
     _loadSummary();
   }
 
   Future<void> _loadSummary() async {
     try {
       final response = await ApiClient.instance.get(ApiEndpoints.globalSummary);
-      setState(() {
-        _summary = Map<String, dynamic>.from(response.data['data']);
-        _loading = false;
-      });
+      final data = Map<String, dynamic>.from(response.data['data']);
+      await CacheService.saveBloodSummary(data);
+      if (mounted) {
+        setState(() {
+          _summary = data;
+          _loading = false;
+        });
+      }
     } catch (_) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -46,6 +57,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final auth = context.watch<AuthController>();
+    final name = auth.user?.fullName.split(' ').first ?? 'Donor';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -58,14 +73,9 @@ class _HomePageState extends State<HomePage> {
                 pinned: true,
                 backgroundColor: AppColors.primary,
                 flexibleSpace: FlexibleSpaceBar(
-                  title: BlocBuilder<AuthBloc, AuthState>(
-                    builder: (_, state) {
-                      final name = state is AuthAuthenticated
-                          ? state.user.fullName.split(' ').first
-                          : 'Donor';
-                      return Text('Hello, $name 👋',
-                          style: const TextStyle(color: Colors.white, fontSize: 16));
-                    },
+                  title: Text(
+                    l10n.hello(name),
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
                   background: Container(
                     decoration: const BoxDecoration(
@@ -97,24 +107,47 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _DonateNowCard(),
+                      if (auth.user?.role == 'donor') _DonateNowCard(),
                       const SizedBox(height: 24),
-                      const Text(
-                        'National Blood Stock',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        l10n.nationalBloodStock,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Real-time inventory across all blood banks',
-                        style: TextStyle(color: AppColors.textSecondary),
+                      Text(
+                        l10n.realTimeInventory,
+                        style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
                 ),
               ),
               if (_loading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.4,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (_, __) => Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      childCount: 8,
+                    ),
+                  ),
                 )
               else if (_summary != null)
                 SliverPadding(
@@ -154,59 +187,57 @@ class _HomePageState extends State<HomePage> {
 class _DonateNowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (_, state) {
-        final user = state is AuthAuthenticated ? state.user : null;
-        final canDonate = user?.canDonate ?? true;
+    final l10n = AppLocalizations.of(context)!;
+    final auth = context.watch<AuthController>();
+    final canDonate = auth.user?.canDonate ?? true;
 
-        return Card(
-          color: canDonate ? AppColors.primary : AppColors.textSecondary,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        canDonate ? 'You can donate today!' : 'Next donation available',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        canDonate
-                            ? 'Find your nearest blood bank'
-                            : 'You donated recently. Thank you!',
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-                if (canDonate)
-                  ElevatedButton(
-                    onPressed: () {
-                      if (GoRouterState.of(context).matchedLocation != '/maps') {
-                        context.go('/maps');
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    return Card(
+      color: canDonate ? AppColors.primary : AppColors.textSecondary,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    canDonate ? l10n.youCanDonateToday : l10n.donatedRecently,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    child: const Text('Donate'),
                   ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    canDonate
+                        ? l10n.findNearestBloodBank
+                        : l10n.donatedRecently,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+            if (canDonate)
+              ElevatedButton(
+                onPressed: () {
+                  if (GoRouterState.of(context).matchedLocation != '/maps') {
+                    context.go('/maps');
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primary,
+                  minimumSize: Size.zero,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                child: Text(l10n.donate),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -238,7 +269,8 @@ class _BloodStockCard extends StatelessWidget {
               children: [
                 BloodTypeBadge(bloodType: bloodType),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -259,7 +291,8 @@ class _BloodStockCard extends StatelessWidget {
               children: [
                 Text(
                   '$units units',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'available',
